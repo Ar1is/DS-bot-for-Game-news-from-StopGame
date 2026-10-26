@@ -16,9 +16,9 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once(Events.ClientReady, () => {
   try {
-    console.log("The bot has started successfully.");
+    console.log("Бот успешно запустился.");
   } catch (error) {
-    console.log("Error, the bot failed to start:  " + error);
+    console.log("Ошибка, бот не смог запуститься:  " + error);
   }
 });
 
@@ -27,7 +27,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (interaction.commandName === "stop") {
     await interaction.reply({
-      content: "bot has stop send news",
+      content: "Бот перестал рассылать новости",
       flags: MessageFlags.Ephemeral,
     });
     if (intervalSendID) {
@@ -42,16 +42,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (interaction.commandName === "start") {
     await interaction.reply({
-      content: "bot has start send news",
+      content: "бот начал рассылать новости",
       flags: MessageFlags.Ephemeral,
     });
-    const channel = client.channels.cache.get(process.env.CHANNEL_ID); // Айди канала. Сюда нужно вставить айди канала который ты хочешь сделать новостным
+    try {
+      const channel = client.channels.cache.get(process.env.CHANNEL_ID); // Айди канала. Сюда нужно вставить айди канала который ты хочешь сделать новостным
 
-    SendNews(channel); //первый раз чтобы сразу запустился
+      SendNews(channel); //первый раз чтобы сразу запустился
 
-    intervalSendID = setInterval(async () => {
-      await SendNews(channel);
-    }, 1800000);
+      intervalSendID = setInterval(async () => {
+        await SendNews(channel);
+      }, 1800000);
+    } catch (error) {
+      console.log("(ID) Айди канала не найдено ");
+    }
   }
 });
 
@@ -83,12 +87,25 @@ async function SendNews(channel) {
     if (getURL && getURL.startsWith("/"))
       getURL = `https://stopgame.ru${getURL}`;
 
+    const response2 = await axios.get(getURL);
+
+    const $2 = cheerio.load(response2.data);
+
+    const firstLine = $2("#material_content");
+
+    const getLine = firstLine.find("p").first().text().trim();
+
     if (!newNewsID || !newNewsText) return;
     if (newNewsID === lastStorageID) {
       return;
     }
 
-    embed.setTitle(newNewsText).setImage(getPicture).setURL(getURL);
+    embed
+      .setTitle(newNewsText)
+      .setDescription(getLine)
+      .setImage(getPicture)
+      .setURL(getURL)
+      .setColor("#610505");
 
     lastStorageID = newNewsID;
 

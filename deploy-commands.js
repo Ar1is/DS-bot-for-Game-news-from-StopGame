@@ -12,7 +12,7 @@ const commands = [
   },
 ];
 
-const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
 
 try {
   console.log("Started refreshing application (/) commands.");
