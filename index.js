@@ -6,7 +6,6 @@ import {
   GatewayIntentBits,
   MessageFlags,
 } from "discord.js";
-import config from "./config.json" with { type: "json" };
 import axios from "axios";
 import * as cheerio from "cheerio";
 let intervalSendID = null; //переменная для запуска и остановки setInterval()
@@ -56,7 +55,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-client.login(config.TOKEN);
+client.login(process.env.TOKEN);
 
 async function SendNews(channel) {
   try {
