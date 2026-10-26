@@ -1,0 +1,28 @@
+import { REST, Routes } from "discord.js";
+import config from "./config.json" with { type: "json" };
+
+const commands = [
+  {
+    name: "stop",
+    description: "stop bot message",
+  },
+
+  {
+    name: "start",
+    description: "start bot message",
+  },
+];
+
+const rest = new REST({ version: "10" }).setToken(config.TOKEN);
+
+try {
+  console.log("Started refreshing application (/) commands.");
+
+  await rest.put(Routes.applicationCommands(config.CLIENT_ID), {
+    body: commands,
+  });
+
+  console.log("Successfully reloaded application (/) commands.");
+} catch (error) {
+  console.error(error);
+}
