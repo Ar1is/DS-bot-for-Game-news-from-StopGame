@@ -1,5 +1,4 @@
 import { REST, Routes } from "discord.js";
-import config from "./config.json" with { type: "json" };
 
 const commands = [
   {
@@ -13,7 +12,7 @@ const commands = [
   },
 ];
 
-const rest = new REST({ version: "10" }).setToken(config.TOKEN);
+const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 try {
   console.log("Started refreshing application (/) commands.");
