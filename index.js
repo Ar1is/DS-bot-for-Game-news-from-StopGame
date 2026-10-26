@@ -82,7 +82,6 @@ async function SendNews(channel) {
     let getURL = latestNewsCard.find("a").eq(0).attr("href");
     if (getURL && getURL.startsWith("/"))
       getURL = `https://stopgame.ru${getURL}`;
-    //допилить желательно картинку и ссылку на полную статью
 
     if (!newNewsID || !newNewsText) return;
     if (newNewsID === lastStorageID) {
