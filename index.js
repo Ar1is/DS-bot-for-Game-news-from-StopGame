@@ -52,7 +52,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       intervalSendID = setInterval(async () => {
         await SendNews(channel);
-      }, 1800000);
+      }, 900000);
     } catch (error) {
       console.log("(ID) Айди канала не найдено ");
     }
