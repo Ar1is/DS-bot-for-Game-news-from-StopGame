@@ -46,7 +46,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       content: "bot has start send news",
       flags: MessageFlags.Ephemeral,
     });
-    const channel = client.channels.cache.get(config.CHANNEL_ID); // Айди канала. Сюда нужно вставить айди канала который ты хочешь сделать новостным
+    const channel = client.channels.cache.get(process.env.CHANNEL_ID); // Айди канала. Сюда нужно вставить айди канала который ты хочешь сделать новостным
 
     SendNews(channel); //первый раз чтобы сразу запустился
 
