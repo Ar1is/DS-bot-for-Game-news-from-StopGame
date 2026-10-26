@@ -86,7 +86,6 @@ async function SendNews(channel) {
 
     if (!newNewsID || !newNewsText) return;
     if (newNewsID === lastStorageID) {
-      channel.send("Новых новостей пока что нету");
       return;
     }
 
