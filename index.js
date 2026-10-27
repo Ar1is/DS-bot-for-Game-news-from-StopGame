@@ -25,41 +25,79 @@ client.once(Events.ClientReady, () => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === "stop") {
-    await interaction.reply({
-      content: "Бот перестал рассылать новости",
-      flags: MessageFlags.Ephemeral,
-    });
-    if (intervalSendID) {
-      clearInterval(intervalSendID);
-      intervalSendID = null;
-    }
-  }
-});
+  switch (interaction.commandName) {
+    case "stop":
+      if (intervalSendID) {
+        await interaction.reply({
+          content: "Бот перестал рассылать новости",
+          flags: MessageFlags.Ephemeral,
+        });
+        clearInterval(intervalSendID);
+        intervalSendID = null;
+      } else {
+        await interaction.reply({
+          content: "Бот уже остановлен его не нужно останавливать повторно",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+      break;
 
-client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+    case "start":
+      const channel = client.channels.cache.get(process.env.CHANNEL_ID);
 
-  if (interaction.commandName === "start") {
-    await interaction.reply({
-      content: "бот начал рассылать новости",
-      flags: MessageFlags.Ephemeral,
-    });
-    try {
-      const channel = client.channels.cache.get(process.env.CHANNEL_ID); // Айди канала. Сюда нужно вставить айди канала который ты хочешь сделать новостным
+      if (!channel) {
+        console.log("Канал с указанным айди не найден в кеше бота!");
+        return await interaction.reply({
+          content:
+            "Ошибка: не удалось найти новостной канал. Проверь CHANNEL_ID",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      if (intervalSendID) {
+        return await interaction.reply({
+          content: "бот уже активен его не нужно запускать повторно",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      await interaction.reply({
+        content: "бот начал рассылать новости",
+        flags: MessageFlags.Ephemeral,
+      });
 
       SendNews(channel); //первый раз чтобы сразу запустился
 
       intervalSendID = setInterval(async () => {
-        await SendNews(channel);
-      }, 900000);
-    } catch (error) {
-      console.log("(ID) Айди канала не найдено ");
-    }
+        try {
+          console.log(
+            `[${new Date().toLocaleTimeString("ru-RU")}] Проверяю сайт на наличие новостей...`,
+          ); // Проверка на работоспособность
+          await SendNews(channel);
+        } catch (error) {
+          if (error.response) {
+            // Если сайт ответил, но выдал ошибку (например, 403 или 503 — это блок защиты)
+            console.log(
+              `[Ошибка сайта] Код ответа: ${error.response.status}. Возможно, сработал анти-DDoS!`,
+            );
+          } else {
+            // Если проблема в сети или коде
+            console.log("Ошибка при периодической отправке новостей:", error);
+            console.error(error.stack);
+          }
+        }
+      }, 1800000);
+
+      break;
   }
 });
-
-client.login(process.env.BOT_TOKEN);
+try {
+  await client.login(process.env.BOT_TOKEN);
+} catch (error) {
+  console.error("КРИТИЧЕСКАЯ ОШИБКА: Бот не смог запуститься!");
+  console.error("Возможно, указан неверный BOT_TOKEN или нет интернета.");
+  console.error(error.message);
+}
 
 async function SendNews(channel) {
   try {
@@ -74,8 +112,10 @@ async function SendNews(channel) {
     const $ = cheerio.load(response.data);
 
     const latestNewsCard = $("#w0 [data-key]").first(); //заходим в тег чтобы парсить первый data-key
-    const newNewsID = latestNewsCard.attr("data-key"); // Получаем айди(id) новости
-
+    const newNewsID = latestNewsCard.attr("data-key");
+    if (newNewsID === lastStorageID) {
+      return;
+    } // Получаем айди(id) новости
     const newNewsText = latestNewsCard.find("a").eq(1).text(); //Получаем текст новости
 
     let getPicture = latestNewsCard.find("img").attr("src");
@@ -96,9 +136,6 @@ async function SendNews(channel) {
     const getLine = firstLine.find("p").first().text().trim();
 
     if (!newNewsID || !newNewsText) return;
-    if (newNewsID === lastStorageID) {
-      return;
-    }
 
     embed
       .setTitle(newNewsText)
