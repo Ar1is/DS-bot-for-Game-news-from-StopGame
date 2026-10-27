@@ -137,8 +137,12 @@ async function SendNews(channel) {
 
     if (!newNewsID || !newNewsText) return;
 
+    const thumbnail =
+      "https://cdn.discordapp.com/avatars/1564257059468218499/f37c0e40fc6ba646c5e252927f5ce157.webp?size=1024";
+
     embed
       .setTitle(newNewsText)
+      .setThumbnail(thumbnail)
       .setDescription(getLine)
       .setImage(getPicture)
       .setURL(getURL)
