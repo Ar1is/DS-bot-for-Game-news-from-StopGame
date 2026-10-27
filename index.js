@@ -86,7 +86,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             console.error(error.stack);
           }
         }
-      }, 1800000);
+      }, 900000);
 
       break;
   }
