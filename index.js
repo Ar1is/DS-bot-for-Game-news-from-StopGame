@@ -146,7 +146,7 @@ async function SendNews(channel) {
       .setDescription(getLine)
       .setImage(getPicture)
       .setURL(getURL)
-      .setColor("#610505");
+      .setColor("#990003");
 
     lastStorageID = newNewsID;
 
